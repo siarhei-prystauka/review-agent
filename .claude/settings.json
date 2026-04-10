@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "mcp__review-agent__post_review_comment",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '[review-agent] Review posted to GitHub successfully'",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

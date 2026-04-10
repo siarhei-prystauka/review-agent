@@ -1,0 +1,4 @@
+{
+  "_note": "This file is kept for reference only. Claude Code loads hooks from .claude/settings.json, not this path. The active hook configuration is in ../.claude/settings.json."
+}
+
