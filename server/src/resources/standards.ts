@@ -25,6 +25,7 @@ let standardsCache: string | null = null;
 async function loadStandards(): Promise<string> {
   if (!standardsCache) {
     standardsCache = await readFile(STANDARDS_PATH, "utf-8");
+    console.error(`[standards] Loaded coding standards from ${STANDARDS_PATH}`);
   }
   return standardsCache;
 }

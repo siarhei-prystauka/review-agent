@@ -41,7 +41,7 @@ A Claude Code plugin that automatically reviews GitHub Pull Requests, identifies
 | Refactoring Advisor | `agents/refactoring-advisor.md` | Suggests structural improvements preserving behavior |
 | Review Skill | `skills/review-pr/SKILL.md` | User-facing `/review-pr` command that orchestrates everything |
 | Coding Standards | `skills/review-pr/references/review-standards.md` | Team coding rules referenced by STD-NNN IDs |
-| Hooks | `hooks/hooks.json` | Post-review notification |
+| Hooks | `.claude/settings.json` | Post-review notification (Claude Code loads hooks from here, not `hooks/hooks.json`) |
 
 ## Prerequisites
 
@@ -146,7 +146,8 @@ review-agent/
 │       ├── SKILL.md                # /review-pr skill
 │       └── references/
 │           └── review-standards.md # Coding standards
-├── hooks/hooks.json                # Hook configuration
+├── .claude/settings.json           # Hook configuration (authoritative location)
+├── hooks/hooks.json                # Reference note only — hooks are NOT loaded from here
 ├── CLAUDE.md                       # Project conventions
 └── README.md
 ```

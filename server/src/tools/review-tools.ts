@@ -1,8 +1,7 @@
 import { z } from "zod";
-import { execFile } from "node:child_process";
-import { promisify } from "node:util";
+import { ghExec } from "../utils/gh.js";
 
-const exec = promisify(execFile);
+const MAX_INLINE_COMMENTS = 100;
 
 const PostReviewSchema = z.object({
   owner: z.string(),
@@ -39,27 +38,6 @@ const PrIdentifierSchema = z.object({
   repo: z.string(),
   pr_number: z.number().int().positive(),
 });
-
-async function ghExec(
-  args: string[],
-  options?: { input?: string; timeout?: number }
-): Promise<string> {
-  try {
-    const { stdout } = await exec("gh", args, {
-      timeout: options?.timeout ?? 30000,
-      input: options?.input,
-    });
-    return stdout;
-  } catch (e: unknown) {
-    // Prefer GitHub's error message from stderr over the generic execFile message
-    const stderr =
-      e instanceof Error && "stderr" in e
-        ? String((e as { stderr: unknown }).stderr).trim()
-        : "";
-    const message = e instanceof Error ? e.message : String(e);
-    throw new Error(`GitHub API error: ${stderr || message}`);
-  }
-}
 
 export const reviewTools = [
   {
@@ -106,7 +84,14 @@ export const reviewTools = [
 
       const payload: Record<string, unknown> = { body, event };
       if (comments && comments.length > 0) {
-        payload.comments = comments.map((c) => ({
+        let inlineComments = comments;
+        let truncationNote = "";
+        if (inlineComments.length > MAX_INLINE_COMMENTS) {
+          inlineComments = inlineComments.slice(0, MAX_INLINE_COMMENTS);
+          truncationNote = `\n\n> **Note**: ${comments.length - MAX_INLINE_COMMENTS} inline comment(s) were omitted because the GitHub API limit of ${MAX_INLINE_COMMENTS} inline comments per review was reached.`;
+        }
+        payload.body = body + truncationNote;
+        payload.comments = inlineComments.map((c) => ({
           path: c.path,
           line: c.line,
           side: c.side,

@@ -1,8 +1,5 @@
 import { z } from "zod";
-import { execFile } from "node:child_process";
-import { promisify } from "node:util";
-
-const exec = promisify(execFile);
+import { ghExec } from "../utils/gh.js";
 
 const PrIdentifierSchema = z.object({
   owner: z.string().describe("Repository owner (e.g., 'octocat')"),
@@ -11,37 +8,13 @@ const PrIdentifierSchema = z.object({
 });
 
 async function ghApi(endpoint: string): Promise<string> {
-  const { stdout } = await exec("gh", ["api", endpoint, "--paginate"], {
-    timeout: 30000,
-  });
-  return stdout;
+  return ghExec(["api", endpoint, "--paginate"]);
 }
 
+// --paginate is intentionally omitted: the diff Accept header returns raw text,
+// not a JSON array, so gh's pagination logic does not apply here.
 async function ghApiRaw(endpoint: string, accept: string): Promise<string> {
-  const { stdout } = await exec(
-    "gh",
-    ["api", endpoint, "-H", `Accept: ${accept}`],
-    { timeout: 30000 }
-  );
-  return stdout;
-}
-
-async function ghApiWithErrorHandling(
-  args: string[],
-  options?: { input?: string; timeout?: number }
-): Promise<string> {
-  try {
-    const { stdout } = await exec("gh", args, {
-      timeout: options?.timeout ?? 30000,
-      input: options?.input,
-    });
-    return stdout;
-  } catch (e: unknown) {
-    const stderr =
-      e instanceof Error && "stderr" in e ? String((e as { stderr: unknown }).stderr) : "";
-    const message = e instanceof Error ? e.message : String(e);
-    throw new Error(stderr || message);
-  }
+  return ghExec(["api", endpoint, "-H", `Accept: ${accept}`]);
 }
 
 export const prTools = [
@@ -206,7 +179,12 @@ export const prTools = [
         .object({
           owner: z.string(),
           repo: z.string(),
-          path: z.string(),
+          path: z
+            .string()
+            .refine(
+              (p) => !p.startsWith("/") && !p.includes(".."),
+              "Path must be relative and must not contain '..'"
+            ),
           ref: z.string().optional(),
         })
         .parse(args);
@@ -215,7 +193,7 @@ export const prTools = [
         `repos/${owner}/${repo}/contents/${path}` +
         (ref ? `?ref=${encodeURIComponent(ref)}` : "");
 
-      const raw = await ghApiWithErrorHandling(["api", endpoint]);
+      const raw = await ghExec(["api", endpoint]);
       const data = JSON.parse(raw);
 
       if (data.type !== "file") {
@@ -300,7 +278,11 @@ function parseDiff(diffText: string): DiffFile[] {
       let oldLine = start.old_start;
       let newLine = start.new_start;
 
-      for (const line of hunkBody.split("\n")) {
+      const hunkBodyLines = hunkBody.split("\n");
+      for (let li = 0; li < hunkBodyLines.length; li++) {
+        const line = hunkBodyLines[li];
+        // Skip the trailing empty string produced by split("\n") at hunk end.
+        if (line === "" && li === hunkBodyLines.length - 1) continue;
         if (line.startsWith("+")) {
           lines.push({
             type: "add",
@@ -315,7 +297,7 @@ function parseDiff(diffText: string): DiffFile[] {
             old_line: oldLine,
           });
           oldLine++;
-        } else if (line.startsWith(" ") || line === "") {
+        } else if (line.startsWith(" ")) {
           lines.push({
             type: "context",
             content: line.substring(1),
