@@ -56,10 +56,28 @@ export const reviewPrompts = [
   },
 ];
 
+// Validates prompt args to prevent injection via crafted owner/repo/pr_number values.
+const OWNER_REPO_RE = /^[a-zA-Z0-9._-]+$/;
+const PR_NUMBER_RE = /^\d+$/;
+
+function validatePromptArgs(args: Record<string, string>): void {
+  if (args.owner && !OWNER_REPO_RE.test(args.owner)) {
+    throw new Error(`Invalid owner: "${args.owner}"`);
+  }
+  if (args.repo && !OWNER_REPO_RE.test(args.repo)) {
+    throw new Error(`Invalid repo: "${args.repo}"`);
+  }
+  if (args.pr_number && !PR_NUMBER_RE.test(args.pr_number)) {
+    throw new Error(`Invalid pr_number: "${args.pr_number}"`);
+  }
+}
+
 export function getPromptMessages(
   name: string,
   args: Record<string, string>
 ): { role: string; content: { type: string; text: string } }[] {
+  validatePromptArgs(args);
+
   if (name === "review_template") {
     const focusArea = args.focus_area || "all";
     return [

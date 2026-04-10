@@ -1,14 +1,17 @@
 import { z } from "zod";
 import { ghExec } from "../utils/gh.js";
+import { PrIdentifierSchema } from "../utils/schemas.js";
 
-const PrIdentifierSchema = z.object({
-  owner: z.string().describe("Repository owner (e.g., 'octocat')"),
-  repo: z.string().describe("Repository name (e.g., 'hello-world')"),
-  pr_number: z.number().int().positive().describe("Pull request number"),
-});
-
+// Single-object endpoints — no pagination needed.
 async function ghApi(endpoint: string): Promise<string> {
-  return ghExec(["api", endpoint, "--paginate"]);
+  return ghExec(["api", endpoint]);
+}
+
+// List endpoints — gh --paginate concatenates pages as [...][...].
+// Replace adjacent array boundaries to produce a single valid JSON array.
+async function ghApiPaginated(endpoint: string): Promise<string> {
+  const raw = await ghExec(["api", endpoint, "--paginate"]);
+  return raw.replace(/\]\s*\[/g, ",");
 }
 
 // --paginate is intentionally omitted: the diff Accept header returns raw text,
@@ -94,7 +97,7 @@ export const prTools = [
     },
     handler: async (args: unknown) => {
       const { owner, repo, pr_number } = PrIdentifierSchema.parse(args);
-      const raw = await ghApi(
+      const raw = await ghApiPaginated(
         `repos/${owner}/${repo}/pulls/${pr_number}/files`
       );
       const files = JSON.parse(raw);
@@ -132,7 +135,7 @@ export const prTools = [
     },
     handler: async (args: unknown) => {
       const { owner, repo, pr_number } = PrIdentifierSchema.parse(args);
-      const raw = await ghApi(
+      const raw = await ghApiPaginated(
         `repos/${owner}/${repo}/pulls/${pr_number}/commits`
       );
       const commits = JSON.parse(raw);
@@ -283,6 +286,8 @@ function parseDiff(diffText: string): DiffFile[] {
         const line = hunkBodyLines[li];
         // Skip the trailing empty string produced by split("\n") at hunk end.
         if (line === "" && li === hunkBodyLines.length - 1) continue;
+        // "\ No newline at end of file" — git marker, not a diff line; skip it.
+        if (line === "\\ No newline at end of file") continue;
         if (line.startsWith("+")) {
           lines.push({
             type: "add",

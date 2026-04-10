@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { ghExec } from "../utils/gh.js";
+import { PrIdentifierSchema } from "../utils/schemas.js";
 
 const MAX_INLINE_COMMENTS = 100;
 
@@ -31,12 +32,6 @@ const PostReviewSchema = z.object({
     )
     .optional()
     .describe("Optional inline comments on specific lines"),
-});
-
-const PrIdentifierSchema = z.object({
-  owner: z.string(),
-  repo: z.string(),
-  pr_number: z.number().int().positive(),
 });
 
 export const reviewTools = [
@@ -135,13 +130,13 @@ export const reviewTools = [
     },
     handler: async (args: unknown) => {
       const { owner, repo, pr_number } = PrIdentifierSchema.parse(args);
-      const stdout = await ghExec([
+      const raw = await ghExec([
         "api",
         `repos/${owner}/${repo}/pulls/${pr_number}/comments`,
         "--paginate",
       ]);
-
-      const comments = JSON.parse(stdout);
+      // gh --paginate concatenates pages as [...][...]; merge into a single array.
+      const comments = JSON.parse(raw.replace(/\]\s*\[/g, ","));
       return comments.map(
         (c: {
           id: number;

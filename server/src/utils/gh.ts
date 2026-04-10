@@ -15,6 +15,7 @@ export async function ghExec(
   try {
     const { stdout } = await exec("gh", args, {
       timeout: options?.timeout ?? 30000,
+      maxBuffer: 10 * 1024 * 1024,
       input: options?.input,
     });
     return stdout;
