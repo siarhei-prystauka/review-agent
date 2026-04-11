@@ -93,6 +93,8 @@ gh auth status
 | `get_pr_info` | Fetch structured PR metadata |
 | `get_pr_diff` | Get parsed per-file diffs with line numbers |
 | `get_pr_files` | List changed files with stats |
+| `get_pr_commits` | Fetch commit messages, authors, and SHAs |
+| `get_file_content` | Read file contents at a specific ref |
 | `post_review_comment` | Post review with inline comments |
 | `get_pr_comments` | Fetch existing review comments |
 
@@ -147,7 +149,6 @@ review-agent/
 │       └── references/
 │           └── review-standards.md # Coding standards
 ├── .claude/settings.json           # Hook configuration (authoritative location)
-├── hooks/hooks.json                # Reference note only — hooks are NOT loaded from here
 ├── CLAUDE.md                       # Project conventions
 └── README.md
 ```
