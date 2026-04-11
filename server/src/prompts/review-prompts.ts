@@ -56,9 +56,12 @@ export const reviewPrompts = [
   },
 ];
 
-// Validates prompt args to prevent injection via crafted owner/repo/pr_number values.
+// Validates prompt args to prevent injection via crafted argument values.
 const OWNER_REPO_RE = /^[a-zA-Z0-9._-]+$/;
 const PR_NUMBER_RE = /^\d+$/;
+const FOCUS_AREA_ALLOWED = new Set(["security", "performance", "style", "bugs", "all"]);
+// filename is inserted into prompt text only — restrict to safe path characters.
+const FILENAME_RE = /^[a-zA-Z0-9._/\-]+$/;
 
 function validatePromptArgs(args: Record<string, string>): void {
   if (args.owner && !OWNER_REPO_RE.test(args.owner)) {
@@ -69,6 +72,14 @@ function validatePromptArgs(args: Record<string, string>): void {
   }
   if (args.pr_number && !PR_NUMBER_RE.test(args.pr_number)) {
     throw new Error(`Invalid pr_number: "${args.pr_number}"`);
+  }
+  if (args.focus_area && !FOCUS_AREA_ALLOWED.has(args.focus_area)) {
+    throw new Error(
+      `Invalid focus_area: "${args.focus_area}". Must be one of: security, performance, style, bugs, all`
+    );
+  }
+  if (args.filename && !FILENAME_RE.test(args.filename)) {
+    throw new Error(`Invalid filename: "${args.filename}"`);
   }
 }
 

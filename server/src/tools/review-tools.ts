@@ -20,7 +20,7 @@ const PostReviewSchema = z.object({
           .number()
           .int()
           .positive()
-          .describe("Line number in the diff to attach the comment to"),
+          .describe("Line number in the file (on the specified side) to attach the comment to"),
         side: z
           .enum(["LEFT", "RIGHT"])
           .default("RIGHT")
@@ -58,7 +58,7 @@ export const reviewTools = [
             type: "object",
             properties: {
               path: { type: "string", description: "File path" },
-              line: { type: "number", description: "Line number in the diff" },
+              line: { type: "number", description: "Line number in the file (on the specified side)" },
               side: {
                 type: "string",
                 enum: ["LEFT", "RIGHT"],
@@ -140,18 +140,18 @@ export const reviewTools = [
       return comments.map(
         (c: {
           id: number;
-          user: { login: string };
+          user: { login: string } | null;
           body: string;
           path: string;
-          line: number;
+          line: number | null;
           side: string;
           created_at: string;
         }) => ({
           id: c.id,
-          author: c.user?.login,
+          author: c.user?.login ?? null,
           body: c.body,
           path: c.path,
-          line: c.line,
+          line: c.line ?? null,
           side: c.side,
           created_at: c.created_at,
         })

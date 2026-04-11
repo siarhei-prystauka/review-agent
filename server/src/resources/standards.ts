@@ -34,8 +34,9 @@ function extractCategory(
   standards: string,
   category: string
 ): string | null {
+  const escaped = category.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const regex = new RegExp(
-    `^## ${category}\\b[^\\n]*\\n([\\s\\S]*?)(?=^## |$)`,
+    `^## ${escaped}\\b[^\\n]*\\n([\\s\\S]*?)(?=^## |$)`,
     "mi"
   );
   const match = standards.match(regex);
