@@ -1,0 +1,8 @@
+{
+  "name": "review-agent",
+  "description": "AI-powered code review and refactoring assistant for GitHub Pull Requests. Uses MCP for structured PR data access, subagents for specialized analysis, and skills for orchestration.",
+  "author": {
+    "name": "Siarhei Prystauka",
+    "email": "s.prystauka@godeltech.com"
+  }
+}

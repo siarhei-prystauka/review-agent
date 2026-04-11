@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.env
+server/**/*.js
+server/**/*.js.map
+server/**/*.d.ts
+!server/tsconfig.json
