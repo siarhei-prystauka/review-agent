@@ -21,28 +21,24 @@ This is a Claude Code plugin that provides AI-powered code review and refactorin
    cd review-agent
    ```
 
-2. Install MCP server dependencies:
+2. Install and register the plugin:
    ```bash
-   cd server && npm install
-   ```
-
-3. Install the plugin into Claude Code:
-   ```bash
+   npm install
    claude plugin install .
    ```
 
-4. Verify everything is wired up:
+3. Verify everything is wired up:
    ```bash
    gh auth status          # confirms gh CLI is authenticated
    claude mcp list         # should show review-agent in the list
    ```
 
-5. In any project directory, run:
+4. In any project directory, run:
    ```
    /review-pr <pr-number>
    ```
 
-> **Note:** The `.mcp.json` at the repo root registers the MCP server automatically when the plugin is installed. No manual edits to your project's MCP config are needed.
+> **Note:** `npm install` at the repo root automatically installs server dependencies via `postinstall`. The `.mcp.json` registers the MCP server when the plugin is installed — no manual config edits needed.
 
 ## Architecture
 
