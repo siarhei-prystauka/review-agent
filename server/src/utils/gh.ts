@@ -1,30 +1,53 @@
-import { execFile } from "node:child_process";
-import { promisify } from "node:util";
-
-const exec = promisify(execFile);
+import { spawn } from "node:child_process";
 
 /**
  * Execute a `gh` CLI command and return stdout.
  * On failure, surfaces GitHub's error message from stderr rather than
- * Node's generic execFile error message.
+ * Node's generic error message.
  */
 export async function ghExec(
   args: string[],
   options?: { input?: string; timeout?: number }
 ): Promise<string> {
-  try {
-    const { stdout } = await exec("gh", args, {
-      timeout: options?.timeout ?? 30000,
+  return new Promise((resolve, reject) => {
+    const timeoutMs = options?.timeout ?? 30000;
+    const child = spawn("gh", args, {
+      stdio: ["pipe", "pipe", "pipe"],
       maxBuffer: 10 * 1024 * 1024,
-      input: options?.input,
+    } as Parameters<typeof spawn>[2]);
+
+    let stdout = "";
+    let stderr = "";
+
+    child.stdout!.on("data", (chunk: Buffer) => {
+      stdout += chunk.toString();
     });
-    return stdout;
-  } catch (e: unknown) {
-    const stderr =
-      e instanceof Error && "stderr" in e
-        ? String((e as { stderr: unknown }).stderr).trim()
-        : "";
-    const message = e instanceof Error ? e.message : String(e);
-    throw new Error(stderr || message);
-  }
+    child.stderr!.on("data", (chunk: Buffer) => {
+      stderr += chunk.toString();
+    });
+
+    const timer = setTimeout(() => {
+      child.kill();
+      reject(new Error(`gh command timed out after ${timeoutMs}ms`));
+    }, timeoutMs);
+
+    child.on("close", (code: number | null) => {
+      clearTimeout(timer);
+      if (code === 0) {
+        resolve(stdout);
+      } else {
+        reject(new Error(stderr.trim() || `gh exited with code ${code}`));
+      }
+    });
+
+    child.on("error", (err: Error) => {
+      clearTimeout(timer);
+      reject(err);
+    });
+
+    if (options?.input !== undefined) {
+      child.stdin!.write(options.input);
+    }
+    child.stdin!.end();
+  });
 }

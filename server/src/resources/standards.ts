@@ -27,7 +27,7 @@ async function loadStandards(): Promise<string> {
     standardsCache = await readFile(STANDARDS_PATH, "utf-8");
     console.error(`[standards] Loaded coding standards from ${STANDARDS_PATH}`);
   }
-  return standardsCache;
+  return standardsCache!;
 }
 
 function extractCategory(
