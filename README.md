@@ -66,9 +66,9 @@ gh auth status
 /review-pr 42
 ```
 
-### Review with Auto-Post to GitHub
+### Review Without Posting to GitHub
 ```
-/review-pr 42 --post
+/review-pr 42 --no-post
 ```
 
 ### Code Review Only (skip refactoring)

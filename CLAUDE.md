@@ -102,7 +102,7 @@ There are no automated tests. Manual testing is done by running the skill via `/
 2. Validate PR is open via `gh pr view`.
 3. Launch `code-reviewer` and `refactoring-advisor` agents **in parallel** (unless `--review-only` or `--refactor-only` is passed). If one fails, continue with the other.
 4. Aggregate findings into a unified report.
-5. If `--post` was passed, call `post_review_comment`; otherwise prompt the user for confirmation.
+5. Call `post_review_comment` unless `--no-post` was passed, in which case only display the report.
 
 ## Agent Responsibilities
 
