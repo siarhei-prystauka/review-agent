@@ -6,6 +6,44 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a Claude Code plugin that provides AI-powered code review and refactoring suggestions for GitHub Pull Requests. It combines an MCP server (for structured GitHub data access), subagents (for specialized analysis), and a skill (for user-facing orchestration).
 
+## Installation
+
+**Prerequisites**
+- [Node.js](https://nodejs.org/) 18+
+- [GitHub CLI](https://cli.github.com/) (`gh`) authenticated via `gh auth login`
+- Claude Code CLI
+
+**Steps**
+
+1. Clone this repository:
+   ```bash
+   git clone <repo-url> review-agent
+   cd review-agent
+   ```
+
+2. Install MCP server dependencies:
+   ```bash
+   cd server && npm install
+   ```
+
+3. Install the plugin into Claude Code:
+   ```bash
+   claude plugin install .
+   ```
+
+4. Verify everything is wired up:
+   ```bash
+   gh auth status          # confirms gh CLI is authenticated
+   claude mcp list         # should show review-agent in the list
+   ```
+
+5. In any project directory, run:
+   ```
+   /review-pr <pr-number>
+   ```
+
+> **Note:** The `.mcp.json` at the repo root registers the MCP server automatically when the plugin is installed. No manual edits to your project's MCP config are needed.
+
 ## Architecture
 
 ```
