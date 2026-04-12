@@ -1,9 +1,8 @@
 {
   "mcpServers": {
     "review-agent": {
-      "command": "npx",
-      "args": ["tsx", "src/index.ts"],
-      "cwd": "server"
+      "command": "node",
+      "args": ["server/node_modules/tsx/dist/cli.mjs", "server/src/index.ts"]
     }
   }
 }
