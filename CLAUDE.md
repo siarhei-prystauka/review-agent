@@ -10,7 +10,7 @@ This is a Claude Code plugin that provides AI-powered code review and refactorin
 
 ```
 /review-pr 42
-    └── skills/review-pr/SKILL.md          # orchestrates the flow
+    └── .claude/skills/review-pr/SKILL.md  # orchestrates the flow
             ├── Agent: code-reviewer       # bugs, security, style
             ├── Agent: refactoring-advisor # structure, maintainability
             └── MCP: review-agent server   # GitHub data + standards + prompts
@@ -54,7 +54,7 @@ There are no automated tests. Manual testing is done by running the skill via `/
 
 **`server/src/tools/review-tools.ts`** — `post_review_comment` caps inline comments at 100 (appends a note if truncated). `get_pr_comments` is used by agents to avoid duplicate findings.
 
-**`server/src/resources/standards.ts`** — Loads `skills/review-pr/references/review-standards.md` once at startup and caches it. Serves two URI patterns:
+**`server/src/resources/standards.ts`** — Loads `.claude/skills/review-pr/references/review-standards.md` once at startup and caches it. Serves two URI patterns:
 - `review://standards` — full document
 - `review://standards/{category}` — extracts a section by heading (e.g., `review://standards/security` → the Security section)
 
@@ -62,7 +62,7 @@ There are no automated tests. Manual testing is done by running the skill via `/
 
 ## Skill Workflow
 
-`skills/review-pr/SKILL.md` orchestrates five steps:
+`.claude/skills/review-pr/SKILL.md` orchestrates five steps:
 
 1. Parse `$ARGUMENTS` — accept PR number or full GitHub URL; detect repo from `gh repo view` if only a number is given.
 2. Validate PR is open via `gh pr view`.
@@ -74,8 +74,8 @@ There are no automated tests. Manual testing is done by running the skill via `/
 
 | Agent | File | Scope |
 |---|---|---|
-| code-reviewer | `agents/code-reviewer.md` | Bugs, security, error handling, style — reports findings ≥ 75 confidence |
-| refactoring-advisor | `agents/refactoring-advisor.md` | Duplication, complexity, naming, dead code — **never** behavioral changes |
+| code-reviewer | `.claude/agents/code-reviewer.md` | Bugs, security, error handling, style — reports findings ≥ 75 confidence |
+| refactoring-advisor | `.claude/agents/refactoring-advisor.md` | Duplication, complexity, naming, dead code — **never** behavioral changes |
 
 Both agents: load standards from `review://standards`, call `get_file_content` for full context, limit analysis to top 20 files by change count on large PRs, and include `file:line` references and `STD-NNN` IDs in every finding.
 

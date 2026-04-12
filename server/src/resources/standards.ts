@@ -13,6 +13,7 @@ const STANDARDS_PATH = join(
   "..",
   "..",
   "..",
+  ".claude",
   "skills",
   "review-pr",
   "references",
