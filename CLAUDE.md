@@ -82,7 +82,7 @@ Both agents: load standards from `review://standards`, call `get_file_content` f
 ## Coding Standards for This Project
 
 - TypeScript for all server code; use ES modules (`import`/`export`)
-- Use the `Server` class from `@modelcontextprotocol/sdk`, not FastMCP
+- Use `McpServer` from `@modelcontextprotocol/sdk/server/mcp.js`, not FastMCP or the low-level `Server` class
 - All MCP tool handlers must validate inputs with Zod schemas
 - Shell out via `ghExec()` for all GitHub API calls — never pass tokens directly
 - Agent `.md` files must include example blocks in their descriptions

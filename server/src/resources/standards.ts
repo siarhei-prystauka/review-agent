@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { McpServer, ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -43,50 +44,56 @@ function extractCategory(
   return match ? match[0].trim() : null;
 }
 
-export const standardsResources = [
-  {
-    uri: "review://standards",
-    name: "Coding Standards",
-    description:
-      "Complete coding standards and review guidelines used by the review agents.",
-    mimeType: "text/markdown",
-  },
-];
-
-export const standardsResourceTemplates = [
-  {
-    uriTemplate: "review://standards/{category}",
-    name: "Coding Standards by Category",
-    description:
-      "Specific category of coding standards (e.g., naming, security, error-handling, testing, complexity, documentation).",
-    mimeType: "text/markdown",
-  },
-];
-
-export async function readStandardsResource(
-  uri: string
-): Promise<{ uri: string; mimeType: string; text: string }> {
-  const standards = await loadStandards();
-
-  if (uri === "review://standards") {
-    return { uri, mimeType: "text/markdown", text: standards };
-  }
-
-  const categoryMatch = uri.match(/^review:\/\/standards\/(.+)$/);
-  if (categoryMatch) {
-    const category = categoryMatch[1]
-      .replace(/-/g, " ")
-      .replace(/\b\w/g, (c) => c.toUpperCase());
-    const section = extractCategory(standards, category);
-    if (section) {
-      return { uri, mimeType: "text/markdown", text: section };
-    }
-    return {
-      uri,
+export function registerStandardsResources(server: McpServer): void {
+  server.registerResource(
+    "Coding Standards",
+    "review://standards",
+    {
+      description:
+        "Complete coding standards and review guidelines used by the review agents.",
       mimeType: "text/markdown",
-      text: `Category "${category}" not found in standards. Available categories can be seen in review://standards.`,
-    };
-  }
+    },
+    async (uri) => {
+      const standards = await loadStandards();
+      return {
+        contents: [{ uri: uri.toString(), mimeType: "text/markdown", text: standards }],
+      };
+    }
+  );
 
-  throw new Error(`Unknown resource URI: ${uri}`);
+  const categoryTemplate = new ResourceTemplate(
+    "review://standards/{category}",
+    { list: undefined }
+  );
+
+  server.registerResource(
+    "Coding Standards by Category",
+    categoryTemplate,
+    {
+      description:
+        "Specific category of coding standards (e.g., naming, security, error-handling, testing, complexity, documentation).",
+      mimeType: "text/markdown",
+    },
+    async (uri, variables) => {
+      const standards = await loadStandards();
+      const rawCategory = Array.isArray(variables.category)
+        ? variables.category[0]
+        : variables.category;
+      const category = rawCategory
+        .replace(/-/g, " ")
+        .replace(/\b\w/g, (c: string) => c.toUpperCase());
+      const section = extractCategory(standards, category);
+      return {
+        contents: [
+          {
+            uri: uri.toString(),
+            mimeType: "text/markdown",
+            text:
+              section ??
+              `Category "${category}" not found in standards. Available categories can be seen in review://standards.`,
+          },
+        ],
+      };
+    }
+  );
 }
