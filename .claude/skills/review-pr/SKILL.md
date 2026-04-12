@@ -1,6 +1,6 @@
 ---
 name: review-pr
-description: "Review a GitHub pull request for code quality issues and refactoring opportunities. Orchestrates code-reviewer and refactoring-advisor agents. Usage: /review-pr <pr-number-or-url> [--post] [--review-only] [--refactor-only]"
+description: "Review a GitHub pull request for code quality issues and refactoring opportunities. Orchestrates code-reviewer and refactoring-advisor agents. Usage: /review-pr <pr-number-or-url> [--no-post] [--review-only] [--refactor-only]"
 user-invocable: true
 allowed-tools:
   - Bash(gh *)
@@ -20,7 +20,7 @@ The user invoked this skill with: $ARGUMENTS
 
 Parse the arguments:
 - First argument: PR number (e.g., `42`) or full GitHub URL (e.g., `https://github.com/owner/repo/pull/42`)
-- `--post`: Automatically post the review to GitHub when done
+- `--no-post`: Skip posting the review to GitHub; display the report only
 - `--review-only`: Only run the code review agent, skip refactoring
 - `--refactor-only`: Only run the refactoring agent, skip code review
 
@@ -111,9 +111,7 @@ Once all launched agents complete (or fail), compile their findings into a unifi
 <- If code is clean: **APPROVE** with praise>
 ```
 
-## Step 5: Post to GitHub (if --post flag)
-
-If the `--post` flag was provided:
+## Step 5: Post to GitHub
 
 Use the `mcp__review-agent__post_review_comment` MCP tool to post the review:
 - Set `body` to the full aggregated review report
@@ -123,8 +121,7 @@ Use the `mcp__review-agent__post_review_comment` MCP tool to post the review:
   - `APPROVE` if no issues found
 - Include inline `comments` array for each finding that has a specific file:line reference
 
-If `--post` was NOT provided:
-Display the report to the user and ask: "Would you like me to post this review to GitHub? Reply with 'yes' to post."
+If the `--no-post` flag was provided, skip this step and only display the report.
 
 ## Important Notes
 

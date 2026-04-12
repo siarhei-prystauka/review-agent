@@ -1,4 +1,23 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(gh repo view*)",
+      "Bash(gh pr view*)",
+      "Bash(gh auth status*)",
+      "Agent",
+      "ToolSearch",
+      "Glob",
+      "Grep",
+      "Read",
+      "mcp__review-agent__get_pr_info",
+      "mcp__review-agent__get_pr_diff",
+      "mcp__review-agent__get_pr_files",
+      "mcp__review-agent__get_pr_commits",
+      "mcp__review-agent__get_pr_comments",
+      "mcp__review-agent__get_file_content",
+      "mcp__review-agent__post_review_comment"
+    ]
+  },
   "hooks": {
     "PostToolUse": [
       {

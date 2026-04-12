@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { ghExec } from "../utils/gh.js";
 import { PrIdentifierSchema } from "../utils/schemas.js";
 
@@ -20,25 +21,18 @@ async function ghApiRaw(endpoint: string, accept: string): Promise<string> {
   return ghExec(["api", endpoint, "-H", `Accept: ${accept}`]);
 }
 
-export const prTools = [
-  {
-    name: "get_pr_info",
-    description:
-      "Fetch structured metadata for a pull request including title, description, author, state, labels, and reviewers.",
-    inputSchema: {
-      type: "object" as const,
-      properties: {
-        owner: { type: "string", description: "Repository owner" },
-        repo: { type: "string", description: "Repository name" },
-        pr_number: { type: "number", description: "Pull request number" },
-      },
-      required: ["owner", "repo", "pr_number"],
+export function registerPrTools(server: McpServer): void {
+  server.registerTool(
+    "get_pr_info",
+    {
+      description:
+        "Fetch structured metadata for a pull request including title, description, author, state, labels, and reviewers.",
+      inputSchema: PrIdentifierSchema.shape,
     },
-    handler: async (args: unknown) => {
-      const { owner, repo, pr_number } = PrIdentifierSchema.parse(args);
+    async ({ owner, repo, pr_number }) => {
       const raw = await ghApi(`repos/${owner}/${repo}/pulls/${pr_number}`);
       const pr = JSON.parse(raw);
-      return {
+      const result = {
         number: pr.number,
         title: pr.title,
         body: pr.body,
@@ -58,50 +52,40 @@ export const prTools = [
         mergeable: pr.mergeable,
         url: pr.html_url,
       };
+      return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
+    }
+  );
+
+  server.registerTool(
+    "get_pr_diff",
+    {
+      description:
+        "Fetch the PR diff parsed into per-file change objects with hunks, added/removed lines, and line numbers. Returns structured, machine-readable diff data.",
+      inputSchema: PrIdentifierSchema.shape,
     },
-  },
-  {
-    name: "get_pr_diff",
-    description:
-      "Fetch the PR diff parsed into per-file change objects with hunks, added/removed lines, and line numbers. Returns structured, machine-readable diff data.",
-    inputSchema: {
-      type: "object" as const,
-      properties: {
-        owner: { type: "string", description: "Repository owner" },
-        repo: { type: "string", description: "Repository name" },
-        pr_number: { type: "number", description: "Pull request number" },
-      },
-      required: ["owner", "repo", "pr_number"],
-    },
-    handler: async (args: unknown) => {
-      const { owner, repo, pr_number } = PrIdentifierSchema.parse(args);
+    async ({ owner, repo, pr_number }) => {
       const raw = await ghApiRaw(
         `repos/${owner}/${repo}/pulls/${pr_number}`,
         "application/vnd.github.v3.diff"
       );
-      return parseDiff(raw);
+      const result = parseDiff(raw);
+      return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
+    }
+  );
+
+  server.registerTool(
+    "get_pr_files",
+    {
+      description:
+        "List all changed files in a PR with their change types (added, modified, deleted, renamed) and patch statistics.",
+      inputSchema: PrIdentifierSchema.shape,
     },
-  },
-  {
-    name: "get_pr_files",
-    description:
-      "List all changed files in a PR with their change types (added, modified, deleted, renamed) and patch statistics.",
-    inputSchema: {
-      type: "object" as const,
-      properties: {
-        owner: { type: "string", description: "Repository owner" },
-        repo: { type: "string", description: "Repository name" },
-        pr_number: { type: "number", description: "Pull request number" },
-      },
-      required: ["owner", "repo", "pr_number"],
-    },
-    handler: async (args: unknown) => {
-      const { owner, repo, pr_number } = PrIdentifierSchema.parse(args);
+    async ({ owner, repo, pr_number }) => {
       const raw = await ghApiPaginated(
         `repos/${owner}/${repo}/pulls/${pr_number}/files`
       );
       const files = JSON.parse(raw);
-      return files.map(
+      const result = files.map(
         (f: {
           filename: string;
           status: string;
@@ -118,28 +102,23 @@ export const prTools = [
           previous_filename: f.previous_filename ?? null,
         })
       );
+      return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
+    }
+  );
+
+  server.registerTool(
+    "get_pr_commits",
+    {
+      description:
+        "Fetch the list of commits in a pull request, including commit messages, authors, and timestamps. Useful for understanding the change history and commit quality.",
+      inputSchema: PrIdentifierSchema.shape,
     },
-  },
-  {
-    name: "get_pr_commits",
-    description:
-      "Fetch the list of commits in a pull request, including commit messages, authors, and timestamps. Useful for understanding the change history and commit quality.",
-    inputSchema: {
-      type: "object" as const,
-      properties: {
-        owner: { type: "string", description: "Repository owner" },
-        repo: { type: "string", description: "Repository name" },
-        pr_number: { type: "number", description: "Pull request number" },
-      },
-      required: ["owner", "repo", "pr_number"],
-    },
-    handler: async (args: unknown) => {
-      const { owner, repo, pr_number } = PrIdentifierSchema.parse(args);
+    async ({ owner, repo, pr_number }) => {
       const raw = await ghApiPaginated(
         `repos/${owner}/${repo}/pulls/${pr_number}/commits`
       );
       const commits = JSON.parse(raw);
-      return commits.map(
+      const result = commits.map(
         (c: {
           sha: string;
           commit: {
@@ -154,44 +133,34 @@ export const prTools = [
           date: c.commit.author?.date,
         })
       );
-    },
-  },
-  {
-    name: "get_file_content",
-    description:
-      "Fetch the content of a file from a GitHub repository at a specific ref (branch, tag, or commit SHA). Use this to read CLAUDE.md, configuration files, or any source file from the PR's repository.",
-    inputSchema: {
-      type: "object" as const,
-      properties: {
-        owner: { type: "string", description: "Repository owner" },
-        repo: { type: "string", description: "Repository name" },
-        path: {
-          type: "string",
-          description: "File path relative to repo root (e.g., 'CLAUDE.md')",
-        },
-        ref: {
-          type: "string",
-          description:
-            "Branch, tag, or commit SHA to read from. Defaults to the default branch.",
-        },
-      },
-      required: ["owner", "repo", "path"],
-    },
-    handler: async (args: unknown) => {
-      const { owner, repo, path, ref } = z
-        .object({
-          owner: z.string(),
-          repo: z.string(),
-          path: z
-            .string()
-            .refine(
-              (p) => !p.startsWith("/") && !p.includes(".."),
-              "Path must be relative and must not contain '..'"
-            ),
-          ref: z.string().optional(),
-        })
-        .parse(args);
+      return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
+    }
+  );
 
+  server.registerTool(
+    "get_file_content",
+    {
+      description:
+        "Fetch the content of a file from a GitHub repository at a specific ref (branch, tag, or commit SHA). Use this to read CLAUDE.md, configuration files, or any source file from the PR's repository.",
+      inputSchema: {
+        owner: z.string().describe("Repository owner"),
+        repo: z.string().describe("Repository name"),
+        path: z
+          .string()
+          .refine(
+            (p) => !p.startsWith("/") && !p.includes(".."),
+            "Path must be relative and must not contain '..'"
+          )
+          .describe("File path relative to repo root (e.g., 'CLAUDE.md')"),
+        ref: z
+          .string()
+          .optional()
+          .describe(
+            "Branch, tag, or commit SHA to read from. Defaults to the default branch."
+          ),
+      },
+    },
+    async ({ owner, repo, path, ref }) => {
       const endpoint =
         `repos/${owner}/${repo}/contents/${path}` +
         (ref ? `?ref=${encodeURIComponent(ref)}` : "");
@@ -204,10 +173,11 @@ export const prTools = [
       }
 
       const content = Buffer.from(data.content, "base64").toString("utf-8");
-      return { path, ref: data.sha, size: data.size, content };
-    },
-  },
-];
+      const result = { path, ref: data.sha, size: data.size, content };
+      return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
+    }
+  );
+}
 
 interface DiffHunk {
   old_start: number;
