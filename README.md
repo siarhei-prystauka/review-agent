@@ -39,8 +39,8 @@ A Claude Code plugin that automatically reviews GitHub Pull Requests, identifies
 | MCP Server | `server/` | Structured GitHub PR data access via tools, resources, and prompts |
 | Code Reviewer | `agents/code-reviewer.md` | Finds bugs, security vulnerabilities, style violations |
 | Refactoring Advisor | `agents/refactoring-advisor.md` | Suggests structural improvements preserving behavior |
-| Review Skill | `skills/review-pr/SKILL.md` | User-facing `/review-pr` command that orchestrates everything |
-| Coding Standards | `skills/review-pr/references/review-standards.md` | Team coding rules referenced by STD-NNN IDs |
+| Review Skill | `.claude/skills/review-pr/SKILL.md` | User-facing `/review-pr` command that orchestrates everything |
+| Coding Standards | `.claude/skills/review-pr/references/review-standards.md` | Team coding rules referenced by STD-NNN IDs |
 | Hooks | `.claude/settings.json` | Post-review notification (Claude Code loads hooks from here, not `hooks/hooks.json`) |
 
 ## Prerequisites
@@ -143,12 +143,15 @@ review-agent/
 ├── agents/
 │   ├── code-reviewer.md            # Code review subagent
 │   └── refactoring-advisor.md      # Refactoring subagent
-├── skills/
-│   └── review-pr/
-│       ├── SKILL.md                # /review-pr skill
-│       └── references/
-│           └── review-standards.md # Coding standards
-├── .claude/settings.json           # Hook configuration (authoritative location)
+├── .claude/
+│   ├── commands/review-pr.md       # /review-pr slash command
+│   ├── skills/review-pr/
+│   │   ├── SKILL.md                # /review-pr skill
+│   │   └── references/
+│   │       └── review-standards.md # Coding standards
+│   └── settings.json               # Hook configuration (authoritative location)
+├── package.json
+├── server-start.cjs
 ├── CLAUDE.md                       # Project conventions
 └── README.md
 ```
