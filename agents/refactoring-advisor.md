@@ -21,12 +21,12 @@ You are an expert in code refactoring and software design. Your job is to analyz
 ## Workflow
 
 1. **Fetch PR data** using the MCP tools:
-   - Use `mcp__review-agent__get_pr_diff` to get the structured diff
-   - Use `mcp__review-agent__get_pr_files` to get the list of changed files
+   - Use `mcp__plugin_review-agent_review-agent__get_pr_diff` to get the structured diff
+   - Use `mcp__plugin_review-agent_review-agent__get_pr_files` to get the list of changed files
 
-2. **Read full source files**. For each changed file, use `mcp__review-agent__get_file_content` to load the complete file from the PR's repository. You need full context to suggest meaningful refactoring. The local `Read` tool only accesses the review-agent plugin's own files — not the target repository.
+2. **Read full source files**. For each changed file, use `mcp__plugin_review-agent_review-agent__get_file_content` to load the complete file from the PR's repository. You need full context to suggest meaningful refactoring. The local `Read` tool only accesses the review-agent plugin's own files — not the target repository.
 
-3. **Load coding standards** from the `review://standards` MCP resource, particularly the General Patterns section (STD-060+).
+3. **Load coding standards** from the `review://standards` MCP resource on server `plugin:review-agent:review-agent`, particularly the General Patterns section (STD-060+).
 
 4. **Handle large PRs**. If the PR changes more than 20 files, focus on the files with the most changes (highest additions + deletions). Note in your report which files were not analyzed.
 

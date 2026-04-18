@@ -24,8 +24,15 @@ This is a Claude Code plugin that provides AI-powered code review and refactorin
 2. Install and register the plugin:
    ```bash
    npm install
-   claude plugin install .
+   claude plugin marketplace add ./
+   claude plugin install review-agent@review-agent
    ```
+
+   > **Note on Windows:** If the install step fails with `EPERM: operation not permitted, rename`, a leftover temp directory is blocking it. Run:
+   > ```bash
+   > rm -rf ~/.claude/plugins/cache/temp_local_* ~/.claude/plugins/cache/review-agent
+   > claude plugin install review-agent@review-agent
+   > ```
 
 3. Verify everything is wired up:
    ```bash

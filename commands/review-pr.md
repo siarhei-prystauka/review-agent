@@ -1,13 +1,7 @@
 ---
-name: review-pr
-description: "Review a GitHub pull request for code quality issues and refactoring opportunities. Orchestrates code-reviewer and refactoring-advisor agents. Usage: /review-pr <pr-number-or-url> [--no-post] [--review-only] [--refactor-only]"
-user-invocable: true
-allowed-tools:
-  - Bash(gh *)
-  - Read
-  - Glob
-  - Grep
-  - Agent
+description: "Review a GitHub pull request for code quality issues and refactoring opportunities. Orchestrates code-reviewer and refactoring-advisor agents."
+argument-hint: "<pr-number-or-url> [--no-post] [--review-only] [--refactor-only]"
+allowed-tools: Bash(gh *), Read, Glob, Grep, Agent
 ---
 
 # PR Review & Refactoring Assistant
@@ -67,9 +61,9 @@ Launch the specialized agents based on the flags provided.
 **Default (no flags) or both needed:**
 Launch BOTH agents in parallel using the Agent tool:
 
-1. **code-reviewer** agent: "Review PR #<number> in <owner>/<repo> for bugs, security issues, and style violations. The PR changes these files: <file list>. Use the MCP tools mcp__plugin_review-agent_review-agent__get_pr_diff and mcp__plugin_review-agent_review-agent__get_pr_files to fetch the diff. Read the review://standards resource for coding standards."
+1. **code-reviewer** agent: "Review PR #<number> in <owner>/<repo> for bugs, security issues, and style violations. The PR changes these files: <file list>. Use the MCP tools mcp__review-agent__get_pr_diff and mcp__review-agent__get_pr_files to fetch the diff. Read the review://standards resource for coding standards."
 
-2. **refactoring-advisor** agent: "Analyze PR #<number> in <owner>/<repo> for refactoring opportunities. The PR changes these files: <file list>. Use the MCP tools mcp__plugin_review-agent_review-agent__get_pr_diff and mcp__plugin_review-agent_review-agent__get_pr_files to fetch the diff. Focus on structural improvements that preserve behavior."
+2. **refactoring-advisor** agent: "Analyze PR #<number> in <owner>/<repo> for refactoring opportunities. The PR changes these files: <file list>. Use the MCP tools mcp__review-agent__get_pr_diff and mcp__review-agent__get_pr_files to fetch the diff. Focus on structural improvements that preserve behavior."
 
 **With `--review-only`:** Launch only the code-reviewer agent.
 **With `--refactor-only`:** Launch only the refactoring-advisor agent.
@@ -113,7 +107,7 @@ Once all launched agents complete (or fail), compile their findings into a unifi
 
 ## Step 5: Post to GitHub
 
-Use the `mcp__plugin_review-agent_review-agent__post_review_comment` MCP tool to post the review:
+Use the `mcp__review-agent__post_review_comment` MCP tool to post the review:
 - Set `body` to the full aggregated review report
 - Set `event` to:
   - `REQUEST_CHANGES` if critical issues were found
@@ -126,6 +120,6 @@ If the `--no-post` flag was provided, skip this step and only display the report
 ## Important Notes
 
 - Always run agents in parallel when both are needed — this saves time.
-- The agents use MCP tools (mcp__plugin_review-agent_review-agent__*) to access PR data. These tools provide structured JSON responses.
+- The agents use MCP tools (mcp__review-agent__*) to access PR data. These tools provide structured JSON responses.
 - The review://standards resource provides the team's coding standards that agents reference by ID (STD-NNN).
 - If a PR has no code changes (only docs, configs), mention that and provide a lighter review.

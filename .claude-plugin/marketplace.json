@@ -1,0 +1,17 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "review-agent",
+  "description": "AI-powered code review and refactoring suggestions for GitHub Pull Requests",
+  "owner": {
+    "name": "Siarhei Prystauka",
+    "email": "s.prystauka@godeltech.com"
+  },
+  "plugins": [
+    {
+      "name": "review-agent",
+      "description": "AI-powered code review and refactoring suggestions for GitHub Pull Requests. Uses MCP for structured PR data access, subagents for specialized analysis, and skills for orchestration.",
+      "category": "productivity",
+      "source": "./"
+    }
+  ]
+}

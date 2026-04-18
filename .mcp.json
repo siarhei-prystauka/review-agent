@@ -2,7 +2,7 @@
   "mcpServers": {
     "review-agent": {
       "command": "node",
-      "args": ["server/node_modules/tsx/dist/cli.mjs", "server/src/index.ts"]
+      "args": ["${CLAUDE_PLUGIN_ROOT}/server-start.cjs"]
     }
   }
 }

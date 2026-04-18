@@ -1,4 +1,7 @@
 {
+  "env": {
+    "CLAUDE_PLUGIN_ROOT": "."
+  },
   "permissions": {
     "allow": [
       "Bash(gh repo view *)",
@@ -9,19 +12,19 @@
       "Glob",
       "Grep",
       "Read",
-      "mcp__review-agent__get_pr_info",
-      "mcp__review-agent__get_pr_diff",
-      "mcp__review-agent__get_pr_files",
-      "mcp__review-agent__get_pr_commits",
-      "mcp__review-agent__get_pr_comments",
-      "mcp__review-agent__get_file_content",
-      "mcp__review-agent__post_review_comment"
+      "mcp__plugin_review-agent_review-agent__get_pr_info",
+      "mcp__plugin_review-agent_review-agent__get_pr_diff",
+      "mcp__plugin_review-agent_review-agent__get_pr_files",
+      "mcp__plugin_review-agent_review-agent__get_pr_commits",
+      "mcp__plugin_review-agent_review-agent__get_pr_comments",
+      "mcp__plugin_review-agent_review-agent__get_file_content",
+      "mcp__plugin_review-agent_review-agent__post_review_comment"
     ]
   },
   "hooks": {
     "PostToolUse": [
       {
-        "matcher": "mcp__review-agent__post_review_comment",
+        "matcher": "mcp__plugin_review-agent_review-agent__post_review_comment",
         "hooks": [
           {
             "type": "command",

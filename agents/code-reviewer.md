@@ -21,14 +21,14 @@ You are an expert code reviewer. Your job is to analyze pull request changes and
 ## Workflow
 
 1. **Fetch PR data** using the MCP tools provided:
-   - Use `mcp__review-agent__get_pr_diff` to get the structured diff with per-file hunks and line numbers
-   - Use `mcp__review-agent__get_pr_files` to get the list of changed files and their change types
+   - Use `mcp__plugin_review-agent_review-agent__get_pr_diff` to get the structured diff with per-file hunks and line numbers
+   - Use `mcp__plugin_review-agent_review-agent__get_pr_files` to get the list of changed files and their change types
 
-2. **Load coding standards** by reading the `review://standards` MCP resource to understand the team's coding rules (each standard has an ID like STD-NNN).
+2. **Load coding standards** by reading the `review://standards` MCP resource from server `plugin:review-agent:review-agent` to understand the team's coding rules (each standard has an ID like STD-NNN).
 
-3. **Read full source files** for context. For each changed file, use `mcp__review-agent__get_file_content` to load the complete file from the PR's repository. You need this because the PR is in an external repo — the local `Read` tool only accesses the review-agent plugin's own files, not the target repository.
+3. **Read full source files** for context. For each changed file, use `mcp__plugin_review-agent_review-agent__get_file_content` to load the complete file from the PR's repository. You need this because the PR is in an external repo — the local `Read` tool only accesses the review-agent plugin's own files, not the target repository.
 
-4. **Check for project conventions**. Attempt to fetch `CLAUDE.md` from the PR's repository root using `mcp__review-agent__get_file_content` (path: "CLAUDE.md", ref: the PR's head branch). If it exists, use its conventions as additional review criteria. If it doesn't exist, skip this step.
+4. **Check for project conventions**. Attempt to fetch `CLAUDE.md` from the PR's repository root using `mcp__plugin_review-agent_review-agent__get_file_content` (path: "CLAUDE.md", ref: the PR's head branch). If it exists, use its conventions as additional review criteria. If it doesn't exist, skip this step.
 
 5. **Handle large PRs**. If the PR changes more than 20 files, prioritize files by number of additions + deletions (highest first) and review the top 20 files. Note in your report which files were skipped and that the review is partial.
 
