@@ -1,18 +1,11 @@
 import { z } from "zod";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { ghExec } from "../utils/gh.js";
+import { ghExec, ghApiPaginatedList } from "../utils/gh.js";
 import { PrIdentifierSchema } from "../utils/schemas.js";
 
 // Single-object endpoints — no pagination needed.
 async function ghApi(endpoint: string): Promise<string> {
   return ghExec(["api", endpoint]);
-}
-
-// List endpoints — gh --paginate concatenates pages as [...][...].
-// Replace adjacent array boundaries to produce a single valid JSON array.
-async function ghApiPaginated(endpoint: string): Promise<string> {
-  const raw = await ghExec(["api", endpoint, "--paginate"]);
-  return raw.replace(/\]\s*\[/g, ",");
 }
 
 // --paginate is intentionally omitted: the diff Accept header returns raw text,
@@ -81,19 +74,16 @@ export function registerPrTools(server: McpServer): void {
       inputSchema: PrIdentifierSchema.shape,
     },
     async ({ owner, repo, pr_number }) => {
-      const raw = await ghApiPaginated(
-        `repos/${owner}/${repo}/pulls/${pr_number}/files`
-      );
-      const files = JSON.parse(raw);
+      const files = await ghApiPaginatedList<{
+        filename: string;
+        status: string;
+        additions: number;
+        deletions: number;
+        changes: number;
+        previous_filename?: string;
+      }>(`repos/${owner}/${repo}/pulls/${pr_number}/files`);
       const result = files.map(
-        (f: {
-          filename: string;
-          status: string;
-          additions: number;
-          deletions: number;
-          changes: number;
-          previous_filename?: string;
-        }) => ({
+        (f) => ({
           filename: f.filename,
           status: f.status,
           additions: f.additions,
@@ -114,19 +104,16 @@ export function registerPrTools(server: McpServer): void {
       inputSchema: PrIdentifierSchema.shape,
     },
     async ({ owner, repo, pr_number }) => {
-      const raw = await ghApiPaginated(
-        `repos/${owner}/${repo}/pulls/${pr_number}/commits`
-      );
-      const commits = JSON.parse(raw);
+      const commits = await ghApiPaginatedList<{
+        sha: string;
+        commit: {
+          message: string;
+          author: { name: string; date: string };
+        };
+        author?: { login: string };
+      }>(`repos/${owner}/${repo}/pulls/${pr_number}/commits`);
       const result = commits.map(
-        (c: {
-          sha: string;
-          commit: {
-            message: string;
-            author: { name: string; date: string };
-          };
-          author?: { login: string };
-        }) => ({
+        (c) => ({
           sha: c.sha.substring(0, 8),
           message: c.commit.message,
           author: c.author?.login ?? c.commit.author?.name,
@@ -161,8 +148,11 @@ export function registerPrTools(server: McpServer): void {
       },
     },
     async ({ owner, repo, path, ref }) => {
+      // Encode each segment so characters like `?`, `#`, `&`, or spaces in
+      // the path cannot inject query parameters or otherwise malform the URL.
+      const encodedPath = path.split("/").map(encodeURIComponent).join("/");
       const endpoint =
-        `repos/${owner}/${repo}/contents/${path}` +
+        `repos/${owner}/${repo}/contents/${encodedPath}` +
         (ref ? `?ref=${encodeURIComponent(ref)}` : "");
 
       const raw = await ghExec(["api", endpoint]);
@@ -227,13 +217,18 @@ function parseDiff(diffText: string): DiffFile[] {
     }[] = [];
 
     while ((match = hunkRegex.exec(section)) !== null) {
+      // Locate the newline that ends the @@ header. If none (the @@ line is
+      // the last line with no trailing newline), fall back to section end so
+      // we don't overrun and produce a negative-length hunk body.
+      const nlIndex = section.indexOf("\n", match.index);
+      const bodyIndex = nlIndex === -1 ? section.length : nlIndex + 1;
       hunkStarts.push({
         headerIndex: match.index, // position of the @@ header itself
-        index: match.index + match[0].length + 1, // position after the @@ line
-        old_start: parseInt(match[1]),
-        old_count: parseInt(match[2] ?? "1"),
-        new_start: parseInt(match[3]),
-        new_count: parseInt(match[4] ?? "1"),
+        index: bodyIndex, // position after the @@ line
+        old_start: parseInt(match[1], 10),
+        old_count: parseInt(match[2] ?? "1", 10),
+        new_start: parseInt(match[3], 10),
+        new_count: parseInt(match[4] ?? "1", 10),
       });
     }
 
@@ -253,7 +248,11 @@ function parseDiff(diffText: string): DiffFile[] {
 
       const hunkBodyLines = hunkBody.split("\n");
       for (let li = 0; li < hunkBodyLines.length; li++) {
-        const line = hunkBodyLines[li];
+        // Strip a trailing \r so Windows-style (CRLF) diffs don't leak the
+        // carriage return into content or defeat the "\ No newline" sentinel
+        // check below.
+        const raw = hunkBodyLines[li];
+        const line = raw.endsWith("\r") ? raw.slice(0, -1) : raw;
         // Skip the trailing empty string produced by split("\n") at hunk end.
         if (line === "" && li === hunkBodyLines.length - 1) continue;
         // "\ No newline at end of file" — git marker, not a diff line; skip it.

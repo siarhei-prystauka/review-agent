@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { ghExec } from "../utils/gh.js";
+import { ghExec, ghApiPaginatedList } from "../utils/gh.js";
 import { PrIdentifierSchema } from "../utils/schemas.js";
 
 const MAX_INLINE_COMMENTS = 100;
@@ -92,23 +92,17 @@ export function registerReviewTools(server: McpServer): void {
       inputSchema: PrIdentifierSchema.shape,
     },
     async ({ owner, repo, pr_number }) => {
-      const raw = await ghExec([
-        "api",
-        `repos/${owner}/${repo}/pulls/${pr_number}/comments`,
-        "--paginate",
-      ]);
-      // gh --paginate concatenates pages as [...][...]; merge into a single array.
-      const comments = JSON.parse(raw.replace(/\]\s*\[/g, ","));
+      const comments = await ghApiPaginatedList<{
+        id: number;
+        user: { login: string } | null;
+        body: string;
+        path: string;
+        line: number | null;
+        side: string;
+        created_at: string;
+      }>(`repos/${owner}/${repo}/pulls/${pr_number}/comments`);
       const result = comments.map(
-        (c: {
-          id: number;
-          user: { login: string } | null;
-          body: string;
-          path: string;
-          line: number | null;
-          side: string;
-          created_at: string;
-        }) => ({
+        (c) => ({
           id: c.id,
           author: c.user?.login ?? null,
           body: c.body,

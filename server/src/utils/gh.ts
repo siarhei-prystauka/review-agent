@@ -13,8 +13,7 @@ export async function ghExec(
     const timeoutMs = options?.timeout ?? 30000;
     const child = spawn("gh", args, {
       stdio: ["pipe", "pipe", "pipe"],
-      maxBuffer: 10 * 1024 * 1024,
-    } as Parameters<typeof spawn>[2]);
+    });
 
     let stdout = "";
     let stderr = "";
@@ -50,4 +49,16 @@ export async function ghExec(
     }
     child.stdin!.end();
   });
+}
+
+/**
+ * Fetch a paginated GitHub API list endpoint as a single flat array.
+ * Uses `gh api --paginate --slurp` (yields `[page1, page2, ...]` where each
+ * page is itself an array) and flattens. Avoids string-level concatenation
+ * of raw pages, which can corrupt any JSON value containing `]...[`.
+ */
+export async function ghApiPaginatedList<T = unknown>(endpoint: string): Promise<T[]> {
+  const raw = await ghExec(["api", endpoint, "--paginate", "--slurp"]);
+  const pages = JSON.parse(raw) as T[][];
+  return pages.flat();
 }

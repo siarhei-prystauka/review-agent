@@ -1,9 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(gh repo view*)",
-      "Bash(gh pr view*)",
-      "Bash(gh auth status*)",
+      "Bash(gh repo view *)",
+      "Bash(gh pr view *)",
+      "Bash(gh auth status *)",
       "Agent",
       "ToolSearch",
       "Glob",

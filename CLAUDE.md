@@ -55,7 +55,7 @@ This is a Claude Code plugin that provides AI-powered code review and refactorin
 ```
 
 - **Plugin manifest**: `.claude-plugin/plugin.json` — registers the plugin name/author.
-- **MCP config**: `.mcp.json` — registers the server; entry point is `server/src/index.ts` via `npx tsx`.
+- **MCP config**: `.mcp.json` — registers the server; launches `server/src/index.ts` by invoking `node server/node_modules/tsx/dist/cli.mjs` directly. `npx tsx` as the MCP launcher was flaky in this environment, so tsx's CLI is executed through Node against its locally-installed path.
 - **Hooks**: `.claude/settings.json` — `PostToolUse` hook on `mcp__review-agent__post_review_comment` prints a success message. There is no `hooks/` directory; hooks live here.
 
 ## Development Commands

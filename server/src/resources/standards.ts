@@ -29,20 +29,27 @@ async function loadStandards(): Promise<string> {
     standardsCache = await readFile(STANDARDS_PATH, "utf-8");
     console.error(`[standards] Loaded coding standards from ${STANDARDS_PATH}`);
   }
-  return standardsCache!;
+  return standardsCache;
 }
 
 function extractCategory(
   standards: string,
   category: string
 ): string | null {
-  const escaped = category.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const regex = new RegExp(
-    `^## ${escaped}\\b[^\\n]*\\n([\\s\\S]*?)(?=^## |$)`,
-    "mi"
-  );
-  const match = standards.match(regex);
-  return match ? match[0].trim() : null;
+  // Split on top-level `## ` headings, then find the section whose heading
+  // starts with the requested category. Regex-based matching with `$` in
+  // multiline mode incorrectly terminates the body at the first end-of-line.
+  const sections = standards.split(/^(?=## )/m);
+  const target = category.toLowerCase();
+  for (const section of sections) {
+    const headingMatch = section.match(/^## ([^\n]+)/);
+    if (!headingMatch) continue;
+    const heading = headingMatch[1].trim().toLowerCase();
+    if (heading === target || heading.startsWith(target + " ") || heading.startsWith(target + "\t")) {
+      return section.trim();
+    }
+  }
+  return null;
 }
 
 export function registerStandardsResources(server: McpServer): void {
