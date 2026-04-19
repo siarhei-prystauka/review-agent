@@ -12,6 +12,8 @@ allowed-tools:
 
 # PR Review & Refactoring Assistant
 
+_Sync note: Keep this file in sync with `../../commands/review-pr.md`._
+
 You are orchestrating a comprehensive code review of a pull request. You will coordinate specialized agents to analyze code quality and suggest improvements.
 
 ## Arguments
@@ -30,9 +32,9 @@ Parse the arguments:
 First, parse all flags.
 If both `--review-only` and `--refactor-only` were provided, show an error and stop.
 If `--model` was provided, validate it immediately (before any `gh` calls):
-- accept aliases `sonnet`, `opus`, `haiku` or full IDs `claude-sonnet-4.5`, `claude-opus-4.5`, `claude-haiku-4.5` (case-insensitive)
+- accept aliases `sonnet`, `opus`, `haiku` or full IDs matching `claude-<family>-<major>(\.<minor>|-<minor>)?` (case-insensitive), for example `claude-sonnet-4.6` or `claude-sonnet-4-6`
 - normalize to lowercase
-- map aliases to the corresponding full model ID
+- map aliases to the corresponding full model ID format used in your Agent call
 - store that fully-qualified model ID for Step 3 Agent calls
 - stop with an error if invalid
 Then extract the PR number from the arguments. If a URL was provided, parse out the owner, repo, and PR number.
@@ -76,6 +78,15 @@ If `--model` was provided, include `model: <fully-qualified-model-id>` in every 
 
 **Default (no flags) or both needed:**
 Launch BOTH agents in parallel using the Agent tool:
+
+Example Agent tool call shape when `--model` is provided:
+```text
+Agent(
+  subagent_type: "code-reviewer",
+  prompt: "...",
+  model: "<fully-qualified-model-id>"
+)
+```
 
 1. **code-reviewer** agent: "Review PR #<number> in <owner>/<repo> for bugs, security issues, and style violations. The PR changes these files: <file list>. Use the MCP tools mcp__plugin_review-agent_review-agent__get_pr_diff and mcp__plugin_review-agent_review-agent__get_pr_files to fetch the diff. Read the review://standards resource for coding standards."
 
