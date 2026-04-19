@@ -23,12 +23,13 @@ Parse the arguments:
 - `--no-post`: Skip posting the review to GitHub; display the report only
 - `--review-only`: Only run the code review agent, skip refactoring
 - `--refactor-only`: Only run the refactoring agent, skip code review
-- `--model <sonnet|opus|haiku>`: Override the Claude model for launched agents
+- `--model <sonnet|opus|haiku>`: Override the Claude model used by each sub-agent
 
 ## Step 1: Parse and Validate
 
-Extract the PR number from the arguments. If a URL was provided, parse out the owner, repo, and PR number.
-If `--model` was provided, validate that the value is one of `sonnet`, `opus`, or `haiku`; if invalid, show an error and stop.
+First, parse all flags.
+If `--model` was provided, validate it immediately (before any `gh` calls): accept `sonnet`, `opus`, or `haiku` (case-insensitive), normalize to lowercase, store the normalized value for Step 3 Agent calls, and stop with an error if invalid.
+Then extract the PR number from the arguments. If a URL was provided, parse out the owner, repo, and PR number.
 
 If only a number was provided, detect the current repository:
 ```bash
@@ -65,7 +66,7 @@ Files changed: <count>
 ## Step 3: Launch Review Agents
 
 Launch the specialized agents based on the flags provided.
-If `--model` was provided, include `model: <value>` in each Agent tool call.
+If `--model` was provided, include `model: <value>` in every Agent tool call, regardless of which agents are launched.
 
 **Default (no flags) or both needed:**
 Launch BOTH agents in parallel using the Agent tool:

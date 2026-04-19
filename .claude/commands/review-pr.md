@@ -17,12 +17,13 @@ Parse the arguments:
 - `--no-post`: Skip posting the review to GitHub; display the report only
 - `--review-only`: Only run the code review agent, skip refactoring
 - `--refactor-only`: Only run the refactoring agent, skip code review
-- `--model <sonnet|opus|haiku>`: Override the Claude model for launched agents
+- `--model <sonnet|opus|haiku>`: Override the Claude model used by each sub-agent
 
 ## Step 1: Parse and Validate
 
-Extract the PR number from the arguments. If a URL was provided, parse out the owner, repo, and PR number.
-If `--model` was provided, validate that the value is one of `sonnet`, `opus`, or `haiku`; if invalid, show an error and stop.
+First, parse all flags.
+If `--model` was provided, validate it immediately (before any `gh` calls): accept `sonnet`, `opus`, or `haiku` (case-insensitive), normalize to lowercase, store the normalized value for Step 3 Agent calls, and stop with an error if invalid.
+Then extract the PR number from the arguments. If a URL was provided, parse out the owner, repo, and PR number.
 
 If only a number was provided, detect the current repository:
 ```bash
@@ -59,14 +60,14 @@ Files changed: <count>
 ## Step 3: Launch Review Agents
 
 Launch the specialized agents based on the flags provided.
-If `--model` was provided, include `model: <value>` in each Agent tool call.
+If `--model` was provided, include `model: <value>` in every Agent tool call, regardless of which agents are launched.
 
 **Default (no flags) or both needed:**
 Launch BOTH agents in parallel using the Agent tool:
 
-1. **code-reviewer** agent: "Review PR #<number> in <owner>/<repo> for bugs, security issues, and style violations. The PR changes these files: <file list>. Use the MCP tools mcp__review-agent__get_pr_diff and mcp__review-agent__get_pr_files to fetch the diff. Read the review://standards resource for coding standards."
+1. **code-reviewer** agent: "Review PR #<number> in <owner>/<repo> for bugs, security issues, and style violations. The PR changes these files: <file list>. Use the MCP tools mcp__plugin_review-agent_review-agent__get_pr_diff and mcp__plugin_review-agent_review-agent__get_pr_files to fetch the diff. Read the review://standards resource for coding standards."
 
-2. **refactoring-advisor** agent: "Analyze PR #<number> in <owner>/<repo> for refactoring opportunities. The PR changes these files: <file list>. Use the MCP tools mcp__review-agent__get_pr_diff and mcp__review-agent__get_pr_files to fetch the diff. Focus on structural improvements that preserve behavior."
+2. **refactoring-advisor** agent: "Analyze PR #<number> in <owner>/<repo> for refactoring opportunities. The PR changes these files: <file list>. Use the MCP tools mcp__plugin_review-agent_review-agent__get_pr_diff and mcp__plugin_review-agent_review-agent__get_pr_files to fetch the diff. Focus on structural improvements that preserve behavior."
 
 **With `--review-only`:** Launch only the code-reviewer agent.
 **With `--refactor-only`:** Launch only the refactoring-advisor agent.
@@ -110,7 +111,7 @@ Once all launched agents complete (or fail), compile their findings into a unifi
 
 ## Step 5: Post to GitHub
 
-Use the `mcp__review-agent__post_review_comment` MCP tool to post the review:
+Use the `mcp__plugin_review-agent_review-agent__post_review_comment` MCP tool to post the review:
 - Set `body` to the full aggregated review report
 - Set `event` to:
   - `REQUEST_CHANGES` if critical issues were found
@@ -123,6 +124,6 @@ If the `--no-post` flag was provided, skip this step and only display the report
 ## Important Notes
 
 - Always run agents in parallel when both are needed — this saves time.
-- The agents use MCP tools (mcp__review-agent__*) to access PR data. These tools provide structured JSON responses.
+- The agents use MCP tools (mcp__plugin_review-agent_review-agent__*) to access PR data. These tools provide structured JSON responses.
 - The review://standards resource provides the team's coding standards that agents reference by ID (STD-NNN).
 - If a PR has no code changes (only docs, configs), mention that and provide a lighter review.
