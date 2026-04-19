@@ -5,6 +5,7 @@ package-lock.json
 server/**/*.js
 server/**/*.js.map
 server/**/*.d.ts
+!server/jest.config.js
 !server/tsconfig.json
 
 # Test coverage

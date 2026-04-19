@@ -20,7 +20,7 @@ describe("PrIdentifierSchema", () => {
     }
   });
 
-  it("should accept empty owner string (Zod default behavior)", () => {
+  it("should reject empty owner string", () => {
     const data = {
       owner: "",
       repo: "hello-world",
@@ -28,11 +28,10 @@ describe("PrIdentifierSchema", () => {
     };
 
     const result = PrIdentifierSchema.safeParse(data);
-    // Zod allows empty strings by default unless .min(1) is used
-    expect(result.success).toBe(true);
+    expect(result.success).toBe(false);
   });
 
-  it("should accept empty repo string (Zod default behavior)", () => {
+  it("should reject empty repo string", () => {
     const data = {
       owner: "octocat",
       repo: "",
@@ -40,8 +39,7 @@ describe("PrIdentifierSchema", () => {
     };
 
     const result = PrIdentifierSchema.safeParse(data);
-    // Zod allows empty strings by default unless .min(1) is used
-    expect(result.success).toBe(true);
+    expect(result.success).toBe(false);
   });
 
   it("should reject non-positive PR number", () => {

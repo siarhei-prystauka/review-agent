@@ -7,9 +7,8 @@ This directory contains the automated test suite for the review-agent MCP server
 ```
 __tests__/
 ├── utils/                  # Unit tests for utility functions
-│   ├── schemas.test.ts    # Zod schema validation tests
-│   └── mockData.ts        # Shared mock data for tests
-├── e2e/                   # End-to-end tests
+│   └── schemas.test.ts    # Zod schema validation tests
+├── unit/                   # Unit tests for server components
 │   └── server.test.ts     # MCP server initialization and registration
 └── README.md              # This file
 ```
@@ -22,12 +21,12 @@ Test individual functions and modules in isolation:
 
 - **schemas.test.ts** — Tests Zod schema validation for PR identifiers
   - Validates correct input formats
-  - Rejects invalid inputs (negative numbers, non-integers, etc.)
-  - Tests edge cases (empty strings, missing fields)
+  - Rejects invalid inputs (negative numbers, non-integers, empty strings)
+  - Tests edge cases (missing fields)
 
-### End-to-End Tests (`e2e/`)
+### Unit Tests (`unit/`)
 
-Test the complete MCP server setup:
+Test server components and tool registration:
 
 - **server.test.ts** — Tests server initialization and tool registration
   - Server creates successfully with correct configuration
@@ -73,17 +72,6 @@ describe("Feature name", () => {
   });
 });
 ```
-
-### Mock Data
-
-Reusable mock data is available in `utils/mockData.ts`:
-
-- `mockPrData` — Sample PR metadata
-- `mockPrFiles` — Sample changed files
-- `mockPrCommits` — Sample commits
-- `mockDiff` — Sample diff output
-- `mockFileContent` — Sample file content
-- `mockReviewComments` — Sample review comments
 
 ## Test Coverage
 
