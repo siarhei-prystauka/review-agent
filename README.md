@@ -81,6 +81,18 @@ gh auth status
 /review-pr 42 --refactor-only
 ```
 
+### Specify Claude Model
+Override the Claude model used by each sub-agent (can be combined with other flags):
+```bash
+/review-pr 42 --model sonnet
+```
+
+### Combined Flags Example
+Review only with a specific model:
+```bash
+/review-pr 42 --model opus --review-only
+```
+
 ### Review by URL
 ```
 /review-pr https://github.com/owner/repo/pull/42
