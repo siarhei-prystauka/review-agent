@@ -6,16 +6,5 @@
     "email": "s.prystauka@godeltech.com"
   },
   "skills": "./.claude/skills/",
-  "agents": ["./.claude/agents/code-reviewer.md", "./.claude/agents/refactoring-advisor.md"],
-  "permissions": {
-    "allow": [
-      "mcp__plugin_review-agent_review-agent__get_pr_info",
-      "mcp__plugin_review-agent_review-agent__get_pr_diff",
-      "mcp__plugin_review-agent_review-agent__get_pr_files",
-      "mcp__plugin_review-agent_review-agent__get_pr_commits",
-      "mcp__plugin_review-agent_review-agent__get_pr_comments",
-      "mcp__plugin_review-agent_review-agent__get_file_content",
-      "mcp__plugin_review-agent_review-agent__post_review_comment"
-    ]
-  }
+  "agents": ["./.claude/agents/code-reviewer.md", "./.claude/agents/refactoring-advisor.md"]
 }
