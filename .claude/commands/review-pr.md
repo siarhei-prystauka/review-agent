@@ -19,11 +19,10 @@ Parse the arguments:
 - `--refactor-only`: Only run the refactoring agent, skip code review
 - `--model <sonnet|opus|haiku>`: Override the Claude model for launched agents
 
-If `--model` is provided, validate the value is one of `sonnet`, `opus`, or `haiku`. If invalid, show an error and stop.
-
 ## Step 1: Parse and Validate
 
 Extract the PR number from the arguments. If a URL was provided, parse out the owner, repo, and PR number.
+If `--model` was provided, validate that the value is one of `sonnet`, `opus`, or `haiku`; if invalid, show an error and stop.
 
 If only a number was provided, detect the current repository:
 ```bash
