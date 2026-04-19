@@ -37,8 +37,8 @@ A Claude Code plugin that automatically reviews GitHub Pull Requests, identifies
 | Component | Location | Purpose |
 |-----------|----------|---------|
 | MCP Server | `server/` | Structured GitHub PR data access via tools, resources, and prompts |
-| Code Reviewer | `agents/code-reviewer.md` | Finds bugs, security vulnerabilities, style violations |
-| Refactoring Advisor | `agents/refactoring-advisor.md` | Suggests structural improvements preserving behavior |
+| Code Reviewer | `.claude/agents/code-reviewer.md` | Finds bugs, security vulnerabilities, style violations |
+| Refactoring Advisor | `.claude/agents/refactoring-advisor.md` | Suggests structural improvements preserving behavior |
 | Review Skill | `.claude/skills/review-pr/SKILL.md` | User-facing `/review-pr` command that orchestrates everything |
 | Coding Standards | `.claude/skills/review-pr/references/review-standards.md` | Team coding rules referenced by STD-NNN IDs |
 | Hooks | `.claude/settings.json` | Post-review notification (Claude Code loads hooks from here, not `hooks/hooks.json`) |
@@ -114,7 +114,7 @@ gh auth status
 
 ## Coding Standards
 
-Standards are defined in `skills/review-pr/references/review-standards.md` and referenced by ID:
+Standards are defined in `.claude/skills/review-pr/references/review-standards.md` and referenced by ID:
 
 - **STD-001 to STD-004**: Naming conventions
 - **STD-010 to STD-013**: Error handling
@@ -140,11 +140,11 @@ review-agent/
 │   │   └── prompts/review-prompts.ts
 │   ├── package.json
 │   └── tsconfig.json
-├── agents/
-│   ├── code-reviewer.md            # Code review subagent
-│   └── refactoring-advisor.md      # Refactoring subagent
 ├── .claude/
-│   ├── commands/review-pr.md       # /review-pr slash command
+│   ├── agents/
+│   │   ├── code-reviewer.md        # Code review subagent
+│   │   └── refactoring-advisor.md  # Refactoring subagent
+│   ├── commands/review-pr.md       # /review-pr slash command (local use)
 │   ├── skills/review-pr/
 │   │   ├── SKILL.md                # /review-pr skill
 │   │   └── references/

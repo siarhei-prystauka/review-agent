@@ -4,5 +4,7 @@
   "author": {
     "name": "Siarhei Prystauka",
     "email": "s.prystauka@godeltech.com"
-  }
+  },
+  "skills": "./.claude/skills/",
+  "agents": "./.claude/agents/"
 }

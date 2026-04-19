@@ -61,7 +61,7 @@ This is a Claude Code plugin that provides AI-powered code review and refactorin
                     └── prompts/review-prompts.ts  # review_template / refactoring_template
 ```
 
-- **Plugin manifest**: `.claude-plugin/plugin.json` — registers the plugin name/author.
+- **Plugin manifest**: `.claude-plugin/plugin.json` — registers the plugin name/author; declares `skills` and `agents` paths pointing to `.claude/skills/` and `.claude/agents/` so no duplication is needed.
 - **MCP config**: `.mcp.json` — registers the server; launches `server/src/index.ts` by invoking `node server/node_modules/tsx/dist/cli.mjs` directly. `npx tsx` as the MCP launcher was flaky in this environment, so tsx's CLI is executed through Node against its locally-installed path.
 - **Hooks**: `.claude/settings.json` — `PostToolUse` hook on `mcp__review-agent__post_review_comment` prints a success message. There is no `hooks/` directory; hooks live here.
 
@@ -115,8 +115,8 @@ There are no automated tests. Manual testing is done by running the skill via `/
 
 | Agent | File | Scope |
 |---|---|---|
-| code-reviewer | `.claude/agents/code-reviewer.md` | Bugs, security, error handling, style — reports findings ≥ 75 confidence |
-| refactoring-advisor | `.claude/agents/refactoring-advisor.md` | Duplication, complexity, naming, dead code — **never** behavioral changes |
+| code-reviewer | [`.claude/agents/code-reviewer.md`](.claude/agents/code-reviewer.md) | Bugs, security, error handling, style — reports findings ≥ 75 confidence |
+| refactoring-advisor | [`.claude/agents/refactoring-advisor.md`](.claude/agents/refactoring-advisor.md) | Duplication, complexity, naming, dead code — **never** behavioral changes |
 
 Both agents: load standards from `review://standards`, call `get_file_content` for full context, limit analysis to top 20 files by change count on large PRs, and include `file:line` references and `STD-NNN` IDs in every finding.
 
