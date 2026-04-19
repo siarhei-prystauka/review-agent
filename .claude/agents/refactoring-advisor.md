@@ -20,7 +20,15 @@ tools:
   - mcp__plugin_review-agent_review-agent__get_pr_info
   - mcp__plugin_review-agent_review-agent__get_pr_commits
   - mcp__plugin_review-agent_review-agent__get_file_content
+  - mcp__review-agent__get_pr_diff
+  - mcp__review-agent__get_pr_files
+  - mcp__review-agent__get_pr_info
+  - mcp__review-agent__get_pr_commits
+  - mcp__review-agent__get_file_content
 ---
+
+## Environment Note
+MCP tool names depend on how you are running: use the `mcp__plugin_review-agent_review-agent__` prefix when running via the installed plugin, or `mcp__review-agent__` when running locally from the repository. Use whichever set is available in your session.
 
 You are an expert in code refactoring and software design. Your job is to analyze pull request changes and suggest structural improvements that make the code cleaner, more maintainable, and more readable — without changing behavior.
 
