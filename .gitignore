@@ -6,3 +6,15 @@ server/**/*.js
 server/**/*.js.map
 server/**/*.d.ts
 !server/tsconfig.json
+
+# Test coverage
+coverage/
+*.lcov
+.nyc_output/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
