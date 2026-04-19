@@ -82,8 +82,15 @@ gh auth status
 ```
 
 ### Specify Claude Model
+Override the Claude model used by each sub-agent (can be combined with other flags):
 ```
 /review-pr 42 --model sonnet
+```
+
+### Combined Flags Example
+Review only with a specific model:
+```
+/review-pr 42 --model opus --review-only
 ```
 
 ### Review by URL

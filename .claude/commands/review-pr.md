@@ -22,7 +22,13 @@ Parse the arguments:
 ## Step 1: Parse and Validate
 
 First, parse all flags.
-If `--model` was provided, validate it immediately (before any `gh` calls): accept `sonnet`, `opus`, or `haiku` (case-insensitive), normalize to lowercase, store the normalized value for Step 3 Agent calls, and stop with an error if invalid.
+If both `--review-only` and `--refactor-only` were provided, show an error and stop.
+If `--model` was provided, validate it immediately (before any `gh` calls):
+- accept aliases `sonnet`, `opus`, `haiku` or full IDs `claude-sonnet-4.5`, `claude-opus-4.5`, `claude-haiku-4.5` (case-insensitive)
+- normalize to lowercase
+- map aliases to the corresponding full model ID
+- store that fully-qualified model ID for Step 3 Agent calls
+- stop with an error if invalid
 Then extract the PR number from the arguments. If a URL was provided, parse out the owner, repo, and PR number.
 
 If only a number was provided, detect the current repository:
@@ -60,7 +66,7 @@ Files changed: <count>
 ## Step 3: Launch Review Agents
 
 Launch the specialized agents based on the flags provided.
-If `--model` was provided, include `model: <value>` in every Agent tool call, regardless of which agents are launched.
+If `--model` was provided, include `model: <fully-qualified-model-id>` in every Agent tool call, regardless of which agents are launched.
 
 **Default (no flags) or both needed:**
 Launch BOTH agents in parallel using the Agent tool:
@@ -69,8 +75,8 @@ Launch BOTH agents in parallel using the Agent tool:
 
 2. **refactoring-advisor** agent: "Analyze PR #<number> in <owner>/<repo> for refactoring opportunities. The PR changes these files: <file list>. Use the MCP tools mcp__plugin_review-agent_review-agent__get_pr_diff and mcp__plugin_review-agent_review-agent__get_pr_files to fetch the diff. Focus on structural improvements that preserve behavior."
 
-**With `--review-only`:** Launch only the code-reviewer agent.
-**With `--refactor-only`:** Launch only the refactoring-advisor agent.
+**With `--review-only`:** Launch only the code-reviewer agent (apply `model:` if `--model` was provided).
+**With `--refactor-only`:** Launch only the refactoring-advisor agent (apply `model:` if `--model` was provided).
 
 If an agent fails (e.g., MCP tool error, rate limit, network issue): include an error notice in that section of the report ("Code review failed: {error message}") and continue with the other agent's results. Do not abort the entire review because one agent failed.
 
