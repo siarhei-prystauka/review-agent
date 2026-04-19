@@ -14,6 +14,13 @@ description: |
   </example>
 model: sonnet
 color: green
+tools:
+  - mcp__plugin_review-agent_review-agent__get_pr_diff
+  - mcp__plugin_review-agent_review-agent__get_pr_files
+  - mcp__plugin_review-agent_review-agent__get_pr_info
+  - mcp__plugin_review-agent_review-agent__get_pr_commits
+  - mcp__plugin_review-agent_review-agent__get_pr_comments
+  - mcp__plugin_review-agent_review-agent__get_file_content
 ---
 
 You are an expert code reviewer. Your job is to analyze pull request changes and find bugs, security vulnerabilities, style violations, and code quality issues.

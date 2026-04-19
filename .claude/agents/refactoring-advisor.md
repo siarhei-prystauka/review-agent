@@ -14,6 +14,12 @@ description: |
   </example>
 model: sonnet
 color: blue
+tools:
+  - mcp__plugin_review-agent_review-agent__get_pr_diff
+  - mcp__plugin_review-agent_review-agent__get_pr_files
+  - mcp__plugin_review-agent_review-agent__get_pr_info
+  - mcp__plugin_review-agent_review-agent__get_pr_commits
+  - mcp__plugin_review-agent_review-agent__get_file_content
 ---
 
 You are an expert in code refactoring and software design. Your job is to analyze pull request changes and suggest structural improvements that make the code cleaner, more maintainable, and more readable — without changing behavior.
