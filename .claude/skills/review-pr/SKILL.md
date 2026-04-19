@@ -1,6 +1,6 @@
 ---
 name: review-pr
-description: "Review a GitHub pull request for code quality issues and refactoring opportunities. Orchestrates code-reviewer and refactoring-advisor agents. Usage: /review-pr <pr-number-or-url> [--no-post] [--review-only] [--refactor-only]"
+description: "Review a GitHub pull request for code quality issues and refactoring opportunities. Orchestrates code-reviewer and refactoring-advisor agents. Usage: /review-pr <pr-number-or-url> [--no-post] [--review-only] [--refactor-only] [--model <sonnet|opus|haiku>]"
 user-invocable: true
 allowed-tools:
   - Bash(gh *)
@@ -23,6 +23,9 @@ Parse the arguments:
 - `--no-post`: Skip posting the review to GitHub; display the report only
 - `--review-only`: Only run the code review agent, skip refactoring
 - `--refactor-only`: Only run the refactoring agent, skip code review
+- `--model <sonnet|opus|haiku>`: Override the Claude model for launched agents
+
+If `--model` is provided, validate the value is one of `sonnet`, `opus`, or `haiku`. If invalid, show an error and stop.
 
 ## Step 1: Parse and Validate
 
@@ -63,6 +66,7 @@ Files changed: <count>
 ## Step 3: Launch Review Agents
 
 Launch the specialized agents based on the flags provided.
+If `--model` was provided, include `model: <value>` in each Agent tool call.
 
 **Default (no flags) or both needed:**
 Launch BOTH agents in parallel using the Agent tool:

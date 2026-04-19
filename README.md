@@ -81,6 +81,11 @@ gh auth status
 /review-pr 42 --refactor-only
 ```
 
+### Specify Claude Model
+```
+/review-pr 42 --model sonnet
+```
+
 ### Review by URL
 ```
 /review-pr https://github.com/owner/repo/pull/42
