@@ -1,6 +1,6 @@
 ---
 description: "Review a GitHub pull request for code quality issues and refactoring opportunities. Orchestrates code-reviewer and refactoring-advisor agents."
-argument-hint: "<pr-number-or-url> [--no-post] [--review-only] [--refactor-only] [--model <sonnet|opus|haiku>]"
+argument-hint: "<pr-number-or-url> [--no-post] [--review-only] [--refactor-only] [--model sonnet|opus|haiku]"
 allowed-tools: Bash(gh *), Read, Glob, Grep, Agent
 ---
 
@@ -24,9 +24,9 @@ Parse the arguments:
 ## Step 1: Parse and Validate
 
 First, parse all flags.
-If both `--review-only` and `--refactor-only` were provided, show an error and stop.
+If both `--review-only` and `--refactor-only` were provided, show an error and stop immediately.
 If `--model` was provided, validate it immediately (before any `gh` calls):
-- accept aliases `sonnet`, `opus`, `haiku` or full IDs matching `claude-<family>-<major>(\.<minor>|-<minor>)?` (case-insensitive), for example `claude-sonnet-4.6` or `claude-sonnet-4-6`
+- accept aliases `sonnet`, `opus`, `haiku` or full IDs matching `claude-<family>-<major>(\.<minor>|-<minor>)?` (case-insensitive)
 - normalize to lowercase
 - map aliases to the corresponding full model ID format used in your Agent call
 - store that fully-qualified model ID for Step 3 Agent calls
