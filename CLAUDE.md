@@ -74,6 +74,15 @@ cd server && npm install
 # Compile TypeScript (outputs to server/dist/)
 cd server && npm run build
 
+# Run tests
+cd server && npm test
+
+# Run tests with coverage
+cd server && npm run test:coverage
+
+# Run tests in watch mode (for development)
+cd server && npm run test:watch
+
 # Run MCP server manually for debugging (stdio transport)
 cd server && npx tsx src/index.ts
 
@@ -81,7 +90,27 @@ cd server && npx tsx src/index.ts
 gh auth status
 ```
 
-There are no automated tests. Manual testing is done by running the skill via `/review-pr`.
+## Testing
+
+The project includes automated tests using Jest. Tests are located in `server/src/__tests__/` and organized by type:
+
+- **Unit tests** (`__tests__/utils/`) — Test individual utility functions and schemas
+- **End-to-end tests** (`__tests__/e2e/`) — Test server initialization and tool registration
+
+**Running tests:**
+```bash
+cd server
+npm test                # Run all tests
+npm run test:coverage   # Run tests with coverage report
+npm run test:watch      # Run tests in watch mode
+```
+
+**Test coverage:** Coverage reports are generated in `server/coverage/` and include:
+- Text summary in console
+- HTML report in `coverage/html/`
+- LCOV report for CI/CD integration
+
+**CI/CD:** GitHub Actions automatically runs tests on all pull requests and pushes to main/master branches. The workflow tests against Node.js 18.x, 20.x, and 22.x.
 
 ## Server Internals
 
